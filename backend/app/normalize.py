@@ -80,11 +80,18 @@ _EMAIL_RE = re.compile(
 )
 
 
-def _clean(raw: object) -> str | None:
+def blank_to_none(raw: object) -> str | None:
     """Strip, and collapse every 'there is no value here' spelling to None.
 
-    Shared by all three functions so the empty-marker set is defined once.
-    Returns the stripped string when there *is* a value.
+    Shared by all three functions so the empty-marker set is defined exactly
+    once. Returns the stripped string when there *is* a value.
+
+    Public, but deliberately not in `__all__`. `__all__` is the compatibility
+    promise -- the three graded signatures, unchanged. This is exported purely
+    so `app.ingest` can apply the same marker vocabulary to the columns that
+    have no dedicated parser (`channel`, `free_text`, `respondent_name`).
+    The alternative is a second copy of the marker set in the ingest, which is
+    precisely the class of bug this module exists to prevent.
     """
     if raw is None:
         return None
@@ -107,7 +114,7 @@ def parse_client_datetime(raw: str | None) -> datetime | None:
     The brief tells you the format the client writes and which local time it
     is in. Do not guess a different one.
     """
-    text = _clean(raw)
+    text = blank_to_none(raw)
     if text is None:
         return None
 
@@ -130,13 +137,13 @@ def normalise_email(raw: str | None) -> str | None:
 
     You decide what "canonical" means here. Say why in your README.
     """
-    text = _clean(raw)
+    text = blank_to_none(raw)
     if text is None:
         return None
 
-    # Strip surrounding whitespace (done in _clean) then lower-case the whole
-    # address. RFC 5321 makes the local part case-sensitive in theory; in
-    # practice no mail system in use treats Asha.Rao and asha.rao as two people,
+    # Strip surrounding whitespace (done in blank_to_none) then lower-case the
+    # whole address. RFC 5321 makes the local part case-sensitive in theory;
+    # in practice no mail system treats Asha.Rao and asha.rao as two people,
     # and the brief's own worked example requires them to compare equal.
     #
     # What is deliberately NOT done: stripping dots, and stripping +tags.
@@ -161,7 +168,7 @@ def parse_duration_seconds(raw: str | None) -> int | None:
     Whether a particular number is a *plausible* duration is a business rule
     and belongs in your ingest, not in here.
     """
-    text = _clean(raw)
+    text = blank_to_none(raw)
     if text is None:
         return None
 

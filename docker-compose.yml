@@ -20,11 +20,15 @@ services:
     environment:
       DATABASE_URL: postgresql+psycopg://aa:aa@db:5432/surveys
       DATA_DIR: /data
+      # /data is read-only, so the ingest cannot write rejects.csv beside
+      # the source. /repo below is the repo root, where the brief wants it.
+      REJECTS_PATH: /repo/rejects.csv
     ports:
       - "8000:8000"
     volumes:
       - ./backend:/srv
       - ./data:/data:ro
+      - ./:/repo
     depends_on:
       db:
         condition: service_healthy
