@@ -1,0 +1,13 @@
+survey_id,survey_name,client_name,invitations_sent,created_date
+1,Q1 Employee Pulse,Northwind Logistics,4200,01/01/2026
+2,Onboarding Feedback - Cohort 7,Northwind Logistics,310,12/01/2026
+3,Dealer NPS - West,Meridian Motors,8800,05/01/2026
+4,Dealer NPS - South,Meridian Motors,7600,05/01/2026
+5,Post-service CSAT,Meridian Motors,15400,02/01/2026
+6,Vendor Compliance Attestation,Halcyon Foods,1250,20/01/2026
+7,Site Safety Walkaround,Halcyon Foods,2900,08/02/2026
+8,Exit Interview,Northwind Logistics,140,15/02/2026
+9,Pilot - Do Not Report,Internal,0,01/03/2026
+10,Customer Effort Score,Meridian Motors,6100,03/03/2026
+11,Training Effectiveness,Halcyon Foods,880,20/03/2026
+12,Q2 Employee Pulse,Northwind Logistics,4350,01/04/2026

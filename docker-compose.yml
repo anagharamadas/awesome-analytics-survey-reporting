@@ -1,0 +1,43 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: aa
+      POSTGRES_PASSWORD: aa
+      POSTGRES_DB: surveys
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U aa -d surveys"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build: ./backend
+    environment:
+      DATABASE_URL: postgresql+psycopg://aa:aa@db:5432/surveys
+      DATA_DIR: /data
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./backend:/srv
+      - ./data:/data:ro
+    depends_on:
+      db:
+        condition: service_healthy
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
+
+  frontend:
+    build: ./frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      - ./frontend:/srv
+      - /srv/node_modules
+    command: npm run dev -- --host 0.0.0.0
+
+volumes:
+  pgdata:

@@ -1,0 +1,7 @@
+:root { font-family: system-ui, sans-serif; color-scheme: light dark; }
+body { margin: 0; padding: 24px; }
+table { border-collapse: collapse; }
+th, td { border: 1px solid #8884; padding: 4px 10px; text-align: left; }
+button { cursor: pointer; }
+.layout { display: flex; gap: 32px; align-items: flex-start; }
+.error { color: #b00020; }

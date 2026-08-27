@@ -1,0 +1,11 @@
+__pycache__/
+*.py[cod]
+.pytest_cache/
+node_modules/
+dist/
+.env
+.venv/
+*.tsbuildinfo
+
+# macOS
+.DS_Store
