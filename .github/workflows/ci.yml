@@ -40,6 +40,9 @@ jobs:
     env:
       DATABASE_URL: postgresql+psycopg://aa:aa@localhost:5432/surveys
       DATA_DIR: ${{ github.workspace }}/data
+      # Same place docker-compose puts it, so the reproducibility check
+      # below compares against the committed file rather than a stray copy.
+      REJECTS_PATH: ${{ github.workspace }}/rejects.csv
 
     steps:
       - uses: actions/checkout@v4

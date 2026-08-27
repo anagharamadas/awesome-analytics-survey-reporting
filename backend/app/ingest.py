@@ -75,8 +75,17 @@ SURVEYS_CSV = os.path.join(DATA_DIR, "surveys.csv")
 RESPONSES_CSV = os.path.join(DATA_DIR, "responses.csv")
 
 # /data is mounted read-only, so rejects cannot be written beside the source.
-# docker-compose mounts the repo root at /repo for this.
-REJECTS_PATH = os.getenv("REJECTS_PATH", "/repo/rejects.csv")
+# docker-compose sets REJECTS_PATH=/repo/rejects.csv against a ./:/repo mount,
+# which puts the file at the repo root where the brief wants it committed.
+#
+# The default has to work when that env var is absent, though - CI runs the
+# ingest without Docker, and "/repo" does not exist there. Deriving it from
+# this module's own location works in both: /srv/rejects.csv inside the
+# container, <repo>/backend/rejects.csv on a bare checkout. An absolute
+# container path as the default was a real portability bug, and CI caught it
+# precisely because it does not run in the container.
+_BACKEND_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+REJECTS_PATH = os.getenv("REJECTS_PATH", os.path.join(_BACKEND_DIR, "rejects.csv"))
 
 RESPONSE_COLUMNS = [
     "response_id",

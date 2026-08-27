@@ -15,3 +15,6 @@ Candidate Brief.html
 
 # Local working notes, not for the public repo
 PROCESS_LOG.md
+
+# A bare (non-Docker) ingest run writes here; the committed copy is at the repo root
+backend/rejects.csv
