@@ -9,3 +9,9 @@ dist/
 
 # macOS
 .DS_Store
+
+# Assessment material - the company's IP, kept local, never published
+Candidate Brief.html
+
+# Local working notes, not for the public repo
+PROCESS_LOG.md
