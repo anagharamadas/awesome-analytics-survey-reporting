@@ -97,6 +97,13 @@ def seeded():
         # 9005: the same instants as 9001, reported by a Dubai client.
         Survey(survey_id=9005, client_id=dubai_client.id, survey_name="Dubai reporting",
                invitations_sent=100, created_date=_ist("01/01/2026 00:00:00").date()),
+        # 9006: no responses AND no invitations - survey 9's exact shape.
+        # Deliberately a fixture rather than a test against the real survey 9,
+        # so the case is covered whether or not the ingest has run. An earlier
+        # version skipped when survey 9 was absent, and a test that silently
+        # skips in CI covers nothing.
+        Survey(survey_id=9006, client_id=ist_client.id, survey_name="No responses",
+               invitations_sent=0, created_date=_ist("01/01/2026 00:00:00").date()),
     ]
     session.add_all(surveys)
 

@@ -51,7 +51,7 @@ class TestReportingWeek:
     def test_every_week_start_is_a_saturday(self, seeded):
         import datetime
 
-        for survey_id in (9001, 9002, 9003, 9004, 9005):
+        for survey_id in (9001, 9002, 9003, 9004, 9005, 9006):
             for week_start in weeks_for(survey_id):
                 assert (
                     datetime.date.fromisoformat(week_start).weekday() == 5
@@ -169,13 +169,16 @@ class TestEndpointContract:
         assert client.get("/api/surveys/424242/summary").status_code == 404
 
     def test_a_survey_with_no_responses_returns_an_empty_week_list(self, seeded):
-        """Survey 9 must not 404 and must not error - the page has to survive
-        every survey in the list, not only the ones with data."""
-        response = client.get("/api/surveys/9/summary")
-        if response.status_code == 404:
-            pytest.skip("survey 9 only exists once the ingest has run")
-        assert response.status_code == 200
-        assert response.json()["weeks"] == []
+        """Survey 9006 has the same shape as the real survey 9: no responses
+        and no invitations. It must return 200 with an empty week list, not a
+        404 and not an error - the page has to survive every survey in the
+        list, not only the ones with data.
+        """
+        response = client.get("/api/surveys/9006/summary")
+        assert response.status_code == 200, response.text
+        body = response.json()
+        assert body["weeks"] == []
+        assert body["invitations_sent"] == 0
 
     def test_the_survey_list_matches_the_front_end_type(self, seeded):
         response = client.get("/api/surveys")
