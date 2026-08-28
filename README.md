@@ -14,7 +14,7 @@ the ingest run below).
 ```bash
 docker compose up --build
 docker compose exec backend python -m app.ingest    # ~7s
-docker compose exec backend pytest
+docker compose exec backend pytest        # 74 tests
 ```
 
 App on http://localhost:5173, API health on http://localhost:8000/api/health.
@@ -225,7 +225,22 @@ the status filter and the median straight from the index. All bucketing,
 counting and the median happen in Postgres in one round trip; nothing is
 aggregated in Python. That is what should hold at ten times the data.
 
-**Correctness was verified separately from speed.** The brief says to read the
+**Correctness is pinned by tests, and the tests were checked for teeth.**
+15 endpoint tests seed their own fixtures — a response at Sat 00:00:00 and
+another at Fri 23:59:59, a `partial` that carries a `completed_at`, a survey
+with zero invitations, a week with no durations at all. Because `REVIEW.md`
+blocks a PR partly for tests that pass with the endpoint bodies deleted, I
+mutation-checked my own: removing the two-day Saturday shift fails 12 tests,
+counting all four statuses fails 1, and dividing by responses received instead
+of invitations fails 2. A test that cannot fail is not protecting anything.
+
+One of those tests caught a mistake of mine while I was writing it. I asserted
+that Sat 10 Jan 03:00 IST would report in a different week for a Dubai client;
+it does not, because Dubai is only 90 minutes behind Kolkata, not three hours.
+The window where the two zones disagree is the 90 minutes after local midnight.
+The fixture now uses 01:00 and the test passes for the right reason.
+
+**Correctness was also verified independently of the tests.** The brief says to read the
 output back against all four rules line by line, so
 [`scripts/verify_summary.py`](scripts/verify_summary.py) recomputes the report
 from the CSV sharing no code with the endpoint — the SQL buckets weeks with
@@ -315,7 +330,8 @@ output. The leverage was in knowing to *look* first; the speed came from the too
 
 Roughly: 15 min reading the brief and profiling the data, 20 min on the schema,
 30 min on the ingest, 15 min on `normalize.py`, 20 min on the endpoint and
-verifying it, 15 min on the page, 25 min on `REVIEW.md` and this file.
+verifying it, 15 min on the page, 25 min on `REVIEW.md` and this file, and a
+further 20 min on the endpoint tests — see below.
 
 **I went over the two hours.** The core six steps landed close to budget; the
 risk register, the ADRs and the CI workflow are extra, and I would rather say
@@ -325,15 +341,16 @@ reasoning, and CI runs the graded test suite and asserts the idempotency claim
 instead of restating it — but they are additional, and the brief is explicit
 that more is not better.
 
+**The endpoint tests were the one thing I went back for.** An earlier draft
+of this section listed them as not-done and named that as my weakest point,
+which sat badly next to a `REVIEW.md` that blocks a PR partly for tests that
+cannot fail. They are now in, mutation-checked, and running in CI. I have left
+this paragraph in rather than quietly editing the gap away, because the
+sequence is the honest one.
+
 **What I did not get to**, in the order I would pick it up:
 
-1. **Endpoint tests.** `normalize.py` has 59, and the summary endpoint is
-   verified by a cross-check script, but there is no committed pytest that
-   pins the Saturday boundary, the survey-9 null rate, or the 404. That gap is
-   the thing I am least happy about — I wrote a review criticising a PR for
-   tests that cannot fail, and my own weakest area is test coverage where it
-   matters most.
-2. **Reconciliation on re-ingest.** Re-running the *same* file is provably
+1. **Reconciliation on re-ingest.** Re-running the *same* file is provably
    idempotent, which is what was asked. A *changed* file whose duplicate
    winner has moved would leave the superseded row behind, because the upsert
    has no way to know it should go.

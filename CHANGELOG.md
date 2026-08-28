@@ -9,6 +9,22 @@ history is kept unreleased and grouped by the brief's six steps.
 ## [Unreleased]
 
 ### Added
+- **Step 2 — ingest.** 38,017 rows read, 37,415 loaded, 590 rejected, and it
+  reconciles exactly. Idempotent on natural keys + `ON CONFLICT DO UPDATE`,
+  verified over three runs and from an empty database by content checksum, not
+  just row counts.
+- **Step 4 — `/api/surveys/{id}/summary`.** Saturday-to-Friday weeks bucketed
+  in the client's own reporting timezone. 3.7 ms p50, 7.7 ms worst of 240
+  samples against a 300 ms budget, answered by an Index Only Scan with zero
+  heap fetches.
+- **Step 5 — the page.** Weekly summary with loading, error and empty states.
+  All twelve surveys verified, including survey 9 which has neither responses
+  nor invitations.
+- **Step 6 — `REVIEW.md`** (block, five ranked findings) and `README.md`.
+- **Tests.** 74 total: 59 for `normalize.py`, 15 for the summary endpoint.
+  The endpoint tests seed their own fixtures and were mutation-checked —
+  removing the Saturday shift fails 12, counting all statuses fails 1,
+  dividing by responses received fails 2.
 - **Step 3 — `normalize.py`.** Three pure field parsers with a shared
   empty-marker set derived by reading `data/responses.csv` rather than
   guessing: `""`, `N/A`, `n/a`, `NULL`, `null`, `-`, `none`. 59 tests.
@@ -29,6 +45,12 @@ history is kept unreleased and grouped by the brief's six steps.
   widened to `number | null`. Survey 9 has zero invitations and zero
   responses, so both are genuinely undefined for it, and the file's own
   comment invites saying so.
+
+### Fixed
+- `REJECTS_PATH` defaulted to `/repo/rejects.csv`, a path that only exists
+  because docker-compose mounts it. CI caught the `PermissionError` on a bare
+  checkout; the default is now derived from the module's own location and
+  works in both environments.
 
 ### Security
 - `Candidate Brief.html` removed from git history before the first push and
